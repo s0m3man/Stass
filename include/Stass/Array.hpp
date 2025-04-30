@@ -204,7 +204,7 @@ namespace Stass {
 
 			length = newLengthCopy;
 
-			delete pointer;
+			delete[] pointer;
 
 			pointer = newArray;
 		}
