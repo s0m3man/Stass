@@ -143,18 +143,24 @@ namespace Stass {
 		}
 
 		virtual String<Char>& operator +=(const String<Char>& String) {
-			CharArray.Remove(CharArray.GetLastIndex());
-
-			CharArray.operator+=(String);
+			AddString(String, GetLastIndex());
 
 			return *this;
 		}
 
-		String<Char> operator +(const String<Char>& OtherString) const {
+		String<Char> operator +(const Char* string) const {
 			String<Char> NewString = *this;
+		
+			NewString += string;
+		
+			return NewString;
+		}
 
-			NewString += OtherString;
-
+		String<Char> operator +(const Char& character) const {
+			String<Char> NewString = *this;
+		
+			NewString.AddCharacter(character, GetLastIndex());
+		
 			return NewString;
 		}
 
