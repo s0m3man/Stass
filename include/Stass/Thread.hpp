@@ -21,6 +21,8 @@ namespace Stass {
 
 			thread = std::thread(func, args...);
 
+			thread.detach();
+
 			working = false;
 		}
 
