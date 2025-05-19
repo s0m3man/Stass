@@ -107,6 +107,20 @@ namespace Stass {
 			return NewStr;
 		}
 
+		bool operator ==(const Path& Other) const {
+			if (Source != Other.Source)
+				return false;
+
+			return Folders == Other.Folders;
+		}
+
+		bool operator !=(const Path& Other) const {
+			if (Source == Other.Source)
+				return false;
+
+			return Folders != Other.Folders;
+		}
+
 	private:
 		Array<String> Folders = {};
 

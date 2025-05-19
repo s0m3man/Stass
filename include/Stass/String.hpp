@@ -144,6 +144,13 @@ namespace Stass {
 			CharArray.Remove(index + OtherString.GetLastIndex());
 		}
 
+		virtual void RemoveLastCharacter() {
+			if (isNull())
+				return;
+
+			CharArray.Remove(CharArray.getLength() - 2);
+		}
+
 		virtual String<Char>& operator =(const String<Char>& String) {
 			CharArray.operator=(String);
 
@@ -182,6 +189,14 @@ namespace Stass {
 
 		const Char* end() const {
 			return CharArray.end();
+		}
+
+		bool operator ==(const String<Char>& Str) const {
+			return CharArray == Str.CharArray;
+		}
+
+		bool operator !=(const String<Char>& Str) const {
+			return CharArray != Str.CharArray;
 		}
 
 	private:
