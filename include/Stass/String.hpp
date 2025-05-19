@@ -49,13 +49,21 @@ namespace Stass {
 				CharArray.operator[](i) = Char(String[i]);
 		}
 
-		String(const Char* string) {
+		template <typename Char2>
+		String(const Char2* string) {
 			unsigned int lastIndex = 0;
 
 			while (string[lastIndex] != 0)
 				lastIndex++;
 
-			CharArray.operator=(Array<Char>::Copied(string, lastIndex + 1));
+			Char* buffer = new Char[lastIndex + 1];
+
+			for (unsigned int i = 0; i <= lastIndex; i++)
+				buffer[i] = (Char)string[i];
+
+			CharArray.operator=(Array<Char>::Copied(buffer, lastIndex + 1));
+
+			delete[] buffer;
 		}
 
 		String(const Char& character = Char()) {
@@ -115,11 +123,11 @@ namespace Stass {
 			return isNull();
 		}
 
-		virtual void AddCharacter(const Char& character, const int& index) {
+		virtual void AddCharacter(const Char& character, const int index) {
 			CharArray.Add(character, index);
 		}
 
-		virtual void AddString(const String<Char>& OtherString, const int& index) {
+		virtual void AddString(const String<Char>& OtherString, const int index) {
 			if (this == &OtherString)
 			{
 				const String<Char> Str = *this;
@@ -150,17 +158,17 @@ namespace Stass {
 
 		String<Char> operator +(const Char* string) const {
 			String<Char> NewString = *this;
-		
+
 			NewString += string;
-		
+
 			return NewString;
 		}
 
 		String<Char> operator +(const Char& character) const {
 			String<Char> NewString = *this;
-		
+
 			NewString.AddCharacter(character, GetLastIndex());
-		
+
 			return NewString;
 		}
 
