@@ -27,7 +27,7 @@ namespace Stass {
 			return NewArr;
 		}
 
-		static Array<Type> Copied(const Type* ptrArray, const unsigned int& ptrArrayLength) {
+		static Array<Type> Copied(const Type* ptrArray, unsigned int ptrArrayLength) {
 			Array<Type> NewArr = {};
 
 			NewArr.SetLength((int)ptrArrayLength);
@@ -38,7 +38,7 @@ namespace Stass {
 			return NewArr;
 		}
 
-		static Array<Type> CopiedInRange(const Type* ptrArray, const unsigned int& from, const unsigned int& to) {
+		static Array<Type> CopiedInRange(const Type* ptrArray, unsigned int from, unsigned int to) {
 			Array<Type> NewArr = {};
 
 			NewArr.SetLength(int(to - from) + 1);
@@ -114,7 +114,8 @@ namespace Stass {
 		}
 
 		Type& operator [](int index) const {
-			CheckIfEmpty();
+			if constexpr (enabledDebug)
+				EmptyWarning();
 
 			SetRealIndex(index);
 
@@ -145,7 +146,8 @@ namespace Stass {
 		}
 
 		Type* CreatePtrArray(int from, int to) const {
-			CheckIfEmpty();
+			if constexpr (enabledDebug)
+				EmptyWarning();
 
 			SetRealIndex(from);
 
@@ -173,7 +175,7 @@ namespace Stass {
 			return newArr;
 		}
 
-		void SetLength(const unsigned int& newLength) {
+		void SetLength(unsigned int newLength) {
 			const int newLengthCopy = int(newLength);
 
 			if (newLengthCopy == length)
@@ -209,16 +211,15 @@ namespace Stass {
 			pointer = newArray;
 		}
 
-		void Shift(int source, const int& steps) {
-			// Checks if array is empty
-			CheckIfEmpty();
+		void Shift(int source, int steps) {
+			if constexpr (enabledDebug) {
+				EmptyWarning();
+
+				StepsWarning(source, steps);
+			}
 
 			// Normalizes index for array bounds
 			SetRealIndex(source);
-
-			// Safety assert
-			if (-steps > source)
-				assert("Steps count got out of array range!");
 
 			// Creates a buffer array
 			Type* buffer = new Type[length];
@@ -261,6 +262,51 @@ namespace Stass {
 			delete[] buffer;
 		}
 
+		void Swap(int source, int destination, unsigned int count = 1) {
+			if (!count)
+				return;
+
+			if constexpr (enabledDebug)
+				EmptyWarning();
+
+			for (unsigned int i = 0; i < count; i++) {
+				const int src = i + source, dst = i + destination;
+
+				const Type buff = operator[](src);
+
+				operator[](src) = operator[](dst);
+
+				operator[](dst) = buff;
+			}
+		}
+
+		void Move(int source, int destination, unsigned int count = 1) {
+			if (!count)
+				return;
+
+			if constexpr (enabledDebug)
+				EmptyWarning();
+
+			SetRealIndex(source); SetRealIndex(destination);
+
+			Type* buffer = new Type[count];
+
+			for (unsigned int i = 0; i < count; i++)
+				buffer[i] = operator[](i + source);
+
+			if (source < destination)
+				for (int i = source; i <= destination; i++)
+					operator[](i) = operator[](i + count);
+			else
+				for (int i = source + count - 1; i >= destination; i--)
+					operator[](i) = operator[](i - count);
+
+			for (unsigned int i = 0; i < count; i++)
+				operator[](i + destination) = buffer[i];
+
+			delete[] buffer;
+		}
+
 		void Add(Type Object, int index = nullIndex) {
 			if (index == nullIndex)
 			{
@@ -299,7 +345,7 @@ namespace Stass {
 				pointer[i + index] = Objects.pointer[i];
 		}
 
-		void Remove(int index, const unsigned int& count = 1) {
+		void Remove(int index, unsigned int count = 1) {
 			if (count == 0)
 				return;
 
@@ -318,8 +364,6 @@ namespace Stass {
 		}
 
 		int getObjectIndex(Type Object) const {
-			CheckIfEmpty();
-
 			for (int i = 0; i < length; i++)
 				if (Object == pointer[i])
 					return i;
@@ -405,9 +449,14 @@ namespace Stass {
 			length = newLength;
 		}
 
-		void CheckIfEmpty() const {
+		void EmptyWarning() const {
 			if (isEmpty())
 				assert("Array is empty!");
+		}
+
+		void StepsWarning(int source, int steps) const {
+			if (-steps > source)
+				assert("Steps count got out of array range!");
 		}
 	};
 
@@ -428,6 +477,27 @@ namespace Stass {
 			os << Array.toPtrArray()[i] << ", ";
 
 		os << Array.toPtrArray()[lastIndex] << " }";
+
+		return os;
+	}
+
+	template <typename Type>
+	std::wostream& operator <<(std::wostream& os, const Array<Type>& Array) {
+		if (Array.isEmpty())
+		{
+			os << L"{ null }";
+
+			return os;
+		}
+
+		const int lastIndex = Array.getLength() - 1;
+
+		os << L"{ ";
+
+		for (int i = 0; i < lastIndex; i++)
+			os << Array.toPtrArray()[i] << L", ";
+
+		os << Array.toPtrArray()[lastIndex] << L" }";
 
 		return os;
 	}
