@@ -303,7 +303,11 @@ namespace Stass {
 			}
 		}
 
-		// Moves objects from source index to destination index by given count. Source and destination values will be normalized by array`s bounds.
+		/*
+		Moves objects from source index to destination index by given count. 
+		Source and destination values will be normalized by array`s bounds.
+		If destination is nullindex value, objects will be moved to the begining of array.
+		*/
 		void Move(int source, int destination, unsigned int count = 1) {
 			if (!count)
 				return;
@@ -311,22 +315,35 @@ namespace Stass {
 			if constexpr (enabledDebug)
 				EmptyWarning();
 
-			SetRealIndex(source); SetRealIndex(destination);
-
 			Type* buffer = new Type[count];
+
+			SetRealIndex(source);
 
 			for (unsigned int i = 0; i < count; i++)
 				buffer[i] = operator[](i + source);
 
-			if (source < destination)
-				for (int i = source; i <= destination; i++)
-					operator[](i) = operator[](i + count);
-			else
-				for (int i = source + count - 1; i >= destination; i--)
+			if (destination == nullIndex) 
+			{
+				for (int i = source + count - 1; i >= 0; i--)
 					operator[](i) = operator[](i - count);
 
-			for (unsigned int i = 0; i < count; i++)
-				operator[](i + destination) = buffer[i];
+				for (unsigned int i = 0; i < count; i++)
+					operator[](i) = buffer[i];
+			}
+			else
+			{
+				SetRealIndex(destination);
+
+				if (source < destination)
+					for (int i = source; i <= destination; i++)
+						operator[](i) = operator[](i + count);
+				else
+					for (int i = source + count - 1; i >= destination; i--)
+						operator[](i) = operator[](i - count);
+
+				for (unsigned int i = 0; i < count; i++)
+					operator[](i + destination) = buffer[i];
+			}
 
 			delete[] buffer;
 		}
