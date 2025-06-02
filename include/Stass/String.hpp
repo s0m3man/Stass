@@ -80,8 +80,7 @@ namespace Stass {
 		}
 
 		// Construction from symbol
-		template <typename Char2>
-		String(Char2 character) {
+		String(Char character) {
 			if (character == 0)
 			{
 				CharArray.SetLength(1);
@@ -93,7 +92,7 @@ namespace Stass {
 				CharArray.operator[](1) = Char();
 			}
 
-			CharArray.operator[](0) = (Char)character;
+			CharArray.operator[](0) = character;
 		}
 
 		// Virtual destructor
